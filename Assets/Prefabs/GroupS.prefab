@@ -9,6 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4258531551812244804}
+  - component: {fileID: 3165458904143237243}
+  - component: {fileID: 1081517598186028676}
   m_Layer: 0
   m_Name: GroupS
   m_TagString: Untagged
@@ -35,6 +37,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3165458904143237243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469184693017662889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a576af1090f4ab48a4450f254cb8556, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1081517598186028676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469184693017662889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef9a8d255b8b2ce4a8e777409a075189, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: {r: 0.040236473, g: 1, b: 0, a: 1}
 --- !u!1 &1808420860299489265
 GameObject:
   m_ObjectHideFlags: 0
