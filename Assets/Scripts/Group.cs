@@ -1,20 +1,38 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Group : MonoBehaviour
 {
     // Time since last gravity tick
-    private float _lastFall = 0;
+    private float _lastFall;
+    private bool _inputGoLeft;
+    private bool _inputGoRight;
+    private bool _inputRotate;
+    private bool _inputGoDown;
 
-    private void Start()
+
+    private void Start() // quando spawna uma peça
     {
-        // Default position not valid? Then it's game over
-        if (!IsValidGridPos())
+        _inputGoLeft = false;
+        _inputGoRight = false;
+        _inputRotate = false;
+        _inputGoDown = false;
+        _lastFall = 0;
+        if (!IsValidGridPos()) // se a peça spawnar em uma posição inválida (em outra peça), game over
         {
-            Debug.Log("GAME OVER");
+            GameOver();
             Destroy(gameObject);
         }
+    }
+
+    private void GameOver()
+    {
+        Invoke(nameof(Reload), 1f);
+    }
+
+    private void Reload()
+    {
+        SceneManager.LoadScene("Tetris");
     }
 
     private void Update()
@@ -22,102 +40,70 @@ public class Group : MonoBehaviour
         ManageInput();
     }
 
+
     private void ManageInput()
     {
-        // Move Left
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        // Left
+        if (_inputGoLeft)
         {
-            // Modify position
+            _inputGoLeft = false;
+            // Move pra esquerda
             transform.position += new Vector3(-1, 0, 0);
 
-            // See if it's valid
             if (IsValidGridPos())
-                // It's valid. Update grid.
                 UpdateGrid();
             else
-                // Its not valid. revert.
                 transform.position += new Vector3(1, 0, 0);
         }
-        // Move Right
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+
+        // Right
+        else if (_inputGoRight)
         {
-            // Modify position
+            _inputGoRight = false;
+            // Move pra direita
             transform.position += new Vector3(1, 0, 0);
 
-            // See if valid
             if (IsValidGridPos())
-                // It's valid. Update grid.
                 UpdateGrid();
             else
-                // It's not valid. revert.
                 transform.position += new Vector3(-1, 0, 0);
         }
+
         // Rotate
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
+        else if (_inputRotate)
         {
+            _inputRotate = false;
             transform.Rotate(0, 0, -90);
 
-            // See if valid
             if (IsValidGridPos())
-                // It's valid. Update grid.
                 UpdateGrid();
             else
-                // It's not valid. revert.
                 transform.Rotate(0, 0, 90);
         }
 
-        // Fall
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            // Modify position
-            transform.position += new Vector3(0, -1, 0);
-
-            // See if valid
-            if (IsValidGridPos())
-            {
-                // It's valid. Update grid.
-                UpdateGrid();
-            }
-            else
-            {
-                // It's not valid. revert.
-                transform.position += new Vector3(0, 1, 0);
-
-                // Clear filled horizontal lines
-                Map.deleteFullRows();
-
-                // Spawn next Group
-                FindObjectOfType<Spawner>().spawnNext();
-
-                // Disable script
-                enabled = false;
-            }
-        }
-        // Move Downwards and Fall
-        else if (Input.GetKeyDown(KeyCode.DownArrow) ||
+        // Down or Fall
+        else if (_inputGoDown ||
                  Time.time - _lastFall >= 1)
         {
-            // Modify position
+            _inputGoDown = false;
+            // Move pra baixo
             transform.position += new Vector3(0, -1, 0);
 
-            // See if valid
-            if (IsValidGridPos())
+            if (IsValidGridPos()) // pode descer
             {
-                // It's valid. Update grid.
                 UpdateGrid();
             }
-            else
+            else // se colidir numa peça
             {
-                // It's not valid. revert.
                 transform.position += new Vector3(0, 1, 0);
 
-                // Clear filled horizontal lines
-                Map.deleteFullRows();
+                // Se esse movimento completar uma linha, limpa a linha
+                Map.DeleteFullRows();
 
-                // Spawn next Group
-                FindObjectOfType<Spawner>().spawnNext();
+                // Spawna a proxima peça
+                FindObjectOfType<Spawner>().SpawnNext();
 
-                // Disable script
+                // desabilita o script
                 enabled = false;
             }
 
@@ -129,15 +115,13 @@ public class Group : MonoBehaviour
     {
         foreach (Transform child in transform)
         {
-            Vector2 v = Map.roundVec2(child.position);
+            var posicaoArredondada = Map.RoundVec2(child.position);
 
-            // Not inside Border?
-            if (!Map.isInsideBorder(v))
+            if (!Map.IsInsideBorder(posicaoArredondada))
                 return false;
 
-            // Block in grid cell (and not part of same group)?
-            if (Map.grid[(int) v.x, (int) v.y] != null &&
-                Map.grid[(int) v.x, (int) v.y].parent != transform)
+            if (Map.Grid[(int) posicaoArredondada.x, (int) posicaoArredondada.y] != null &&
+                Map.Grid[(int) posicaoArredondada.x, (int) posicaoArredondada.y].parent != transform)
                 return false;
         }
 
@@ -147,17 +131,45 @@ public class Group : MonoBehaviour
     private void UpdateGrid()
     {
         // Remove old children from grid
-        for (int y = 0; y < Map.h; ++y)
-        for (int x = 0; x < Map.w; ++x)
-            if (Map.grid[x, y] != null)
-                if (Map.grid[x, y].parent == transform)
-                    Map.grid[x, y] = null;
+        for (var y = 0; y < Map.H; ++y)
+        {
+            for (var x = 0; x < Map.W; ++x)
+            {
+                if (Map.Grid[x, y] != null)
+                {
+                    if (Map.Grid[x, y].parent == transform)
+                    {
+                        Map.Grid[x, y] = null;
+                    }
+                }
+            }
+        }
 
         // Add new children to grid
         foreach (Transform child in transform)
         {
-            Vector2 v = Map.roundVec2(child.position);
-            Map.grid[(int) v.x, (int) v.y] = child;
+            var posicaoArredondada = Map.RoundVec2(child.position);
+            Map.Grid[(int) posicaoArredondada.x, (int) posicaoArredondada.y] = child;
         }
+    }
+
+    public void InputGoLeft()
+    {
+        _inputGoLeft = true;
+    }
+
+    public void InputGoRight()
+    {
+        _inputGoRight = true;
+    }
+
+    public void InputRotate()
+    {
+        _inputRotate = true;
+    }
+
+    public void InputGoDown()
+    {
+        _inputGoDown = true;
     }
 }

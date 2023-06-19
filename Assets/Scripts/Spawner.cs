@@ -1,23 +1,19 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class Spawner : MonoBehaviour
 {
-    public GameObject[] groups;
+    [SerializeField] private GameObject[] groups;
 
     private void Start()
     {
-        spawnNext();
+        SpawnNext();
     }
 
-    public void spawnNext()
+    public void SpawnNext() // instancia uma peça
     {
         var i = Random.Range(0, groups.Length);
 
-        // Spawn Group at current Position
         Instantiate(groups[i],
             transform.position,
             Quaternion.identity);

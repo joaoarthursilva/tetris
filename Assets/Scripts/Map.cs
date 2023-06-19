@@ -1,75 +1,72 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Map : MonoBehaviour
 {
-    // The Grid itself
-    public static int w = 10;
-    public static int h = 20;
-    public static Transform[,] grid = new Transform[w, h];
+    public const int W = 10; // largura
+    public const int H = 20; // altura
+    public static readonly Transform[,] Grid = new Transform[W, H];
 
-    public static Vector2 roundVec2(Vector2 v)
+    public static Vector2 RoundVec2(Vector2 vector2) // arredonda um vector2
     {
-        return new Vector2(Mathf.Round(v.x),
-            Mathf.Round(v.y));
+        return new Vector2(Mathf.Round(vector2.x),
+            Mathf.Round(vector2.y));
     }
 
-    public static bool isInsideBorder(Vector2 pos)
+    public static bool IsInsideBorder(Vector2 pos) // verifica se a peça está dentro das bordas do mapa
     {
         return ((int) pos.x >= 0 &&
-                (int) pos.x < w &&
+                (int) pos.x < W &&
                 (int) pos.y >= 0);
     }
 
-    public static void deleteRow(int y)
+    private static void DeleteRow(int y) // deleta uma linha y
     {
-        for (int x = 0; x < w; ++x)
+        for (var x = 0; x < W; ++x)
         {
-            Destroy(grid[x, y].gameObject);
-            grid[x, y] = null;
+            Destroy(Grid[x, y].gameObject);
+            Grid[x, y] = null;
         }
     }
 
-    public static void decreaseRow(int y)
+    private static void DecreaseRow(int y) // desce as peças de uma linha y
     {
-        for (int x = 0; x < w; ++x)
+        for (var x = 0; x < W; ++x)
         {
-            if (grid[x, y] != null)
+            if (Grid[x, y] != null)
             {
                 // Move one towards bottom
-                grid[x, y - 1] = grid[x, y];
-                grid[x, y] = null;
+                Grid[x, y - 1] = Grid[x, y];
+                Grid[x, y] = null;
 
                 // Update Block position
-                grid[x, y - 1].position += new Vector3(0, -1, 0);
+                Grid[x, y - 1].position += new Vector3(0, -1, 0);
             }
         }
     }
 
-    public static void decreaseRowsAbove(int y)
+    private static void DecreaseRowsAbove(int y) // desce as peças acima de uma linha y
     {
-        for (int i = y; i < h; ++i)
-            decreaseRow(i);
+        for (var i = y; i < H; ++i)
+            DecreaseRow(i);
     }
 
-    public static void deleteFullRows()
+    public static void DeleteFullRows() // deleta todas linhas que estão completas
     {
-        for (int y = 0; y < h; ++y)
+        for (var y = 0; y < H; ++y)
         {
-            if (isRowFull(y))
+            if (IsRowFull(y))
             {
-                deleteRow(y);
-                decreaseRowsAbove(y + 1);
+                DeleteRow(y);
+                DecreaseRowsAbove(y + 1);
                 --y;
             }
         }
     }
 
-    public static bool isRowFull(int y)
+    private static bool IsRowFull(int y) // verifica se a linha está completa
     {
-        for (int x = 0; x < w; ++x)
-            if (grid[x, y] == null)
+        for (var x = 0; x < W; ++x)
+            if (Grid[x, y] == null)
                 return false;
         return true;
     }
