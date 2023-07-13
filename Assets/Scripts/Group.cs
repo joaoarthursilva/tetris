@@ -10,6 +10,7 @@ public class Group : MonoBehaviour
     private bool _inputRotate;
     private bool _inputGoDown;
 
+    [SerializeField] private float fallDelay = 1f; // ????????
 
     private void Start() // quando spawna uma peça
     {
@@ -21,7 +22,6 @@ public class Group : MonoBehaviour
         if (!IsValidGridPos()) // se a peça spawnar em uma posição inválida (em outra peça), game over
         {
             GameOver();
-            Destroy(gameObject);
         }
     }
 
@@ -83,7 +83,7 @@ public class Group : MonoBehaviour
 
         // Down or Fall
         else if (_inputGoDown ||
-                 Time.time - _lastFall >= 1)
+                 Time.time - _lastFall >= fallDelay)
         {
             _inputGoDown = false;
             // Move pra baixo
