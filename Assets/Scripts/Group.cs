@@ -9,6 +9,7 @@ public class Group : MonoBehaviour
     private bool _inputGoRight;
     private bool _inputRotate;
     private bool _inputGoDown;
+    private bool _inputHardDrop;
 
     [SerializeField] private float fallDelay = 1f; // ????????
 
@@ -18,6 +19,7 @@ public class Group : MonoBehaviour
         _inputGoRight = false;
         _inputRotate = false;
         _inputGoDown = false;
+        _inputHardDrop = false;
         _lastFall = 0;
         if (!IsValidGridPos()) // se a peça spawnar em uma posição inválida (em outra peça), game over
         {
@@ -87,7 +89,7 @@ public class Group : MonoBehaviour
         {
             _inputGoDown = false;
             // Move pra baixo
-            transform.position += new Vector3(0, -1, 0);
+            MoveDown();
 
             if (IsValidGridPos()) // pode descer
             {
@@ -95,7 +97,7 @@ public class Group : MonoBehaviour
             }
             else // se colidir numa peça
             {
-                transform.position += new Vector3(0, 1, 0);
+                MoveUp();
 
                 // Se esse movimento completar uma linha, limpa a linha
                 Map.DeleteFullRows();
@@ -109,6 +111,44 @@ public class Group : MonoBehaviour
 
             _lastFall = Time.time;
         }
+        else if (_inputHardDrop)
+        {
+            _inputHardDrop = false;
+            // Move pra baixo
+            for (int i = 0; i < 20; i++)
+            {
+                MoveDown();
+
+                if (IsValidGridPos()) // pode descer
+                {
+                    UpdateGrid();
+                }
+                else // se colidir numa peça
+                {
+                    MoveUp();
+
+                    // Se esse movimento completar uma linha, limpa a linha
+                    Map.DeleteFullRows();
+
+                    // Spawna a proxima peça
+                    FindObjectOfType<Spawner>().SpawnNext();
+
+                    // desabilita o script
+                    enabled = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void MoveUp()
+    {
+        transform.position += new Vector3(0, 1, 0);
+    }
+
+    private void MoveDown()
+    {
+        transform.position += new Vector3(0, -1, 0);
     }
 
     private bool IsValidGridPos()
@@ -171,5 +211,10 @@ public class Group : MonoBehaviour
     public void InputGoDown()
     {
         _inputGoDown = true;
+    }
+
+    public void InputHardDrop()
+    {
+        _inputHardDrop = true;
     }
 }

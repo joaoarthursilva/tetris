@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ButtonInputManager : MonoBehaviour
@@ -22,5 +20,10 @@ public class ButtonInputManager : MonoBehaviour
     public void InputGoDown()
     {
         FindObjectOfType<Group>().InputGoDown();
+    }
+
+    public void InputHardDrop()
+    {
+        FindObjectOfType<Group>().InputHardDrop();
     }
 }

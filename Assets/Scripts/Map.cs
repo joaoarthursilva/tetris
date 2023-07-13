@@ -52,15 +52,21 @@ public class Map : MonoBehaviour
 
     public static void DeleteFullRows() // deleta todas linhas que estão completas
     {
+        var currentDeletedRows = 0;
+        var lastDeletedRowY = 0; // trocar para posição padrao
         for (var y = 0; y < H; ++y)
         {
             if (IsRowFull(y))
             {
+                currentDeletedRows++;
                 DeleteRow(y);
                 DecreaseRowsAbove(y + 1);
+                lastDeletedRowY = y;
                 --y;
             }
         }
+
+        FindObjectOfType<RowManager>().AddDeletedRows(currentDeletedRows, lastDeletedRowY);
     }
 
     private static bool IsRowFull(int y) // verifica se a linha está completa
